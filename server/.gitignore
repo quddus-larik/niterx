@@ -1,0 +1,91 @@
+# Compiled binaries and executables
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.obj
+*.pyc
+*.pyo
+*.pyd
+*.class
+*.jar
+*.war
+*.ear
+*.bin
+
+# Log files
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+node_modules/
+vendor/
+build/
+dist/
+target/
+
+# Environment variables
+.env
+.env.*
+!.env.example # Keep example for reference if applicable
+
+# IDE and OS specific files
+.idea/ # IntelliJ IDEA
+.vscode/ # VS Code
+.DS_Store # macOS
+Thumbs.db # Windows
+*.sublime-project
+*.sublime-workspace
+*.bak
+*~
+*.swp
+.project
+.classpath
+.settings/
+.cache/
+
+# Test/Coverage reports
+/coverage
+/.nyc_output
+/test-results
+
+# Database files (if not in version control)
+*.sqlite
+*.db
+*.sqlite3
+
+# Uploaded files
+/uploads/
+
+# For Python projects
+__pycache__/
+
+# For Java projects
+*.iml # IntelliJ IDEA module files
+.gradle/
+/out/
+
+# For Go projects
+/bin/
+/pkg/
+
+# For Ruby projects
+.bundle/
+/vendor/bundle/
+
+# For PHP projects
+composer.phar
+/vendor/ # If not using composer, adjust accordingly
+
+# Docker
+.dockerignore
+!Dockerfile
+!docker-compose.yml
+
+# Other common temporary files
+tmp/
+temp/

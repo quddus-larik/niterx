@@ -1,0 +1,21 @@
+{
+    "origin": "*dev",
+    "api": "/no-found",
+    "api/v1": [
+        {
+            "./auth/[slug]": [
+                "POST",
+                "AUTH-0"
+            ]
+        },
+        {
+            "./v1/products": [
+                {
+                    "phones/": [
+                        "GET->JSON"
+                    ]
+                }
+            ]
+        }
+    ]
+}
