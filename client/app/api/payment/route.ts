@@ -13,7 +13,7 @@ const stripe = new Stripe(STRIPE_SECRET, {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json(); // ⬅️ Parse JSON body
+    const body = await req.json(); 
     const { amount } = body;
 
     if (!amount || typeof amount !== 'number') {
@@ -25,11 +25,11 @@ export async function POST(req: NextRequest) {
       line_items: [
         {
           price_data: {
-            currency: 'usd',
+            currency: 'pkr',
             product_data: {
               name: 'Sample Product',
             },
-            unit_amount: amount * 100, // convert dollars to cents
+            unit_amount: Math.round(amount * 100), // Convert PKR to paisa
           },
           quantity: 1,
         },

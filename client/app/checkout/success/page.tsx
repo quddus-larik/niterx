@@ -1,13 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Button } from '@heroui/react';
+import React, { useState, useEffect } from 'react';
+import { addToast, Button } from '@heroui/react';
 import { useRouter } from 'next/navigation';
 import { BsCheckCircleFill } from 'react-icons/bs';
+import { useDispatch } from 'react-redux';
+import { clearCart } from '@/app/lib/redux/features/cookie/cookieSlice';
 
 const SuccessPayment = () => {
+  const dispatch = useDispatch();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+
+  useEffect(()=>{
+    dispatch(clearCart());
+    addToast({
+      title: "your cart cleared for success transaction.",
+      color: "default"
+    })
+  },[])
 
   const handleGoBack = () => {
     setLoading(true);

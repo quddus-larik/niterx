@@ -299,7 +299,7 @@ const totalAmounts = useMemo(() => {
                 ))}
               </Select>
               {Payment === 101 ? (
-                <CheckoutButton amount={totalAmount || 21} isDisabled={!isFormValid} />
+                <CheckoutButton amount={totalAmounts.totalPKR || 0} isDisabled={!isFormValid}  />
               ) : Payment === 102 ? (
                 <Button isLoading={isProcessingOrder} className="w-full text-white bg-black" startContent={<RiEBike2Fill className="text-lg text-white" />} isDisabled={!isFormValid} type="submit">
                   Order Now
