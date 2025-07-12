@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { addItemToCart } from "../../lib/redux/features/cookie/cookieSlice";
-import { Button, Alert } from "@heroui/react"; // Import HeroUI Alert and Button
+import { Button, addToast } from "@heroui/react";
 
 interface Product {
   id: string;
@@ -18,54 +18,46 @@ interface Product {
   price?: number;
 }
 
-interface AddToCartButtonProps {
-  phone: Product;
+interface Color {
+  name: string;
+  hex: string;
 }
 
-export default function AddToCartButton({ phone }: AddToCartButtonProps) {
+interface AddToCartButtonProps {
+  phone: Product;
+  selectedColor?: Color;
+}
+
+export default function AddToCartButton({ phone, selectedColor }: AddToCartButtonProps) {
   const dispatch = useDispatch();
-  const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
-  const showTemporaryAlert = useCallback((message: string) => {
+  const showTemporaryAlert = (message: string) => {
     setAlertMessage(message);
-    setShowAlert(true);
-    const timeout = setTimeout(() => {
-      setShowAlert(false);
-      setAlertMessage("");
-    }, 2500);
-    return () => clearTimeout(timeout);
-  }, []);
+    addToast({
+      description: alertMessage,
+      color: "success",
+      timeout: 2000,
+    })
+  }
 
   const handleAddToCart = useCallback(() => {
-    dispatch(addItemToCart(phone));
-    showTemporaryAlert(`${phone.mobile_name} added to cart!`);
-  }, [dispatch, phone, showTemporaryAlert]);
+    const cartItem = {
+      ...phone,
+      selectedColor: selectedColor
+        ? { name: selectedColor.name, hex: selectedColor.hex }
+        : null,
+    };
+
+    dispatch(addItemToCart(cartItem));
+    showTemporaryAlert(
+      `${phone.mobile_name} (${selectedColor?.name || "Default Color"}) added to cart!`
+    );
+  }, [dispatch, phone, selectedColor, showTemporaryAlert]);
 
   return (
-    <>
-      <Button
-        onPress={handleAddToCart}
-        color="primary"
-        className="px-6 py-2"
-      >
+      <Button onPress={handleAddToCart} color="primary" className="px-6 py-2">
         Add to Cart
       </Button>
-
-      {showAlert && (
-        <div className="fixed z-50 w-full max-w-sm bottom-4 right-4">
-          <Alert
-            color="success"
-            title="Added to Cart"
-            description={alertMessage}
-            variant="faded"
-            onClose={() => {
-              setShowAlert(false);
-              setAlertMessage("");
-            }}
-          />
-        </div>
-      )}
-    </>
   );
 }

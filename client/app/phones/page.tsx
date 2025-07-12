@@ -181,7 +181,6 @@ export default function Phones() {
   
   const handleUpdateQuantity = (id: number, delta: number) => {
     dispatch(updateCartItemQuantity({ productId: id, delta }));
-    Alert("Cart","quantity updated!","success",2000)
   };
   
   const handleRemoveFromCart = (id: string) => {
@@ -361,7 +360,7 @@ export default function Phones() {
               ) : (
                 cartItems.map((item) => (
                   <div
-                    key={item.product.id}
+                    key={item.product.doc_id}
                     className="flex items-center gap-4 py-2 border-b"
                   >
                     <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-md">

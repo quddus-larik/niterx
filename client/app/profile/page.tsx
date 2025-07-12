@@ -108,12 +108,12 @@ export default function ProfilePage() {
             </Button>
             <Button
               color="primary"
-              endContent={<Icon icon="lucide:edit" />}
+              endContent={<Icon icon="lucide:user-round-pen" />}
               onPress={handleEditOpen}
               className="font-semibold"
-            >
-              Edit Profile
-            </Button>
+              isIconOnly
+            />
+              
           </CardHeader>
           <Divider className="bg-gray-200" />
           <CardBody className="p-6 space-y-8">
@@ -199,6 +199,43 @@ export default function ProfilePage() {
           </CardBody>
         </Card>
 
+        <Card className="shadow-lg rounded-xl">
+          <CardHeader className="p-6">
+            <h2 className="text-2xl font-bold text-gray-900">Information</h2>
+          </CardHeader>
+          <Divider className="bg-gray-200" />
+          <CardBody className="px-6 py-8 space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Icon icon="lucide:info" className="text-2xl text-primary-600" />
+                <div>
+                  <p className="text-lg font-medium text-gray-800">
+                    Track Order
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Watch Your Product on way
+                  </p>
+                </div>
+              </div>
+              <Button isIconOnly startContent={<Icon icon="lucide:arrow-up-right" />} radius="full" />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Icon icon="lucide:history" className="text-2xl text-primary-600" />
+                <div>
+                  <p className="text-lg font-medium text-gray-800">
+                    History
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Check Your transaction $ Product History
+                  </p>
+                </div>
+              </div>
+              <Button isIconOnly startContent={<Icon icon="lucide:arrow-up-right" />} radius="full" />
+            </div>
+          </CardBody>
+        </Card>
+        
         <Card className="shadow-lg rounded-xl">
           <CardHeader className="p-6">
             <h2 className="text-2xl font-bold text-gray-900">Account Settings</h2>

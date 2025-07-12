@@ -5,12 +5,11 @@ import { useParams } from "next/navigation";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { PiPlugChargingDuotone } from "react-icons/pi";
 import {
   Card,
   CardHeader,
   CardBody,
-  CardFooter,
-  Divider,
   Chip,
   Button,
   Skeleton,
@@ -18,15 +17,11 @@ import {
   Avatar,
   Tabs,
   Tab,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   useDisclosure,
   Breadcrumbs,
   BreadcrumbItem,
   Tooltip,
+  addToast
 } from "@heroui/react";
 import {
   FaMemory,
@@ -115,6 +110,7 @@ export default function PhoneDetailPage() {
   const doc_id = parseInt(id as string);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [ImageUrl, setImageUrl] = useState("");
+  const [selectedColor, setSelectedColor] = useState<Color | null>(null);
 
   const { data, loading, error } = useQuery(GET_PHONE_BY_ID, {
     variables: { doc_id },
@@ -249,29 +245,32 @@ export default function PhoneDetailPage() {
               </CardHeader>
               <CardBody className="pt-0">
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm">
-                    <FaCheck className="flex-shrink-0 text-green-600" />
-                    <span className="text-gray-700">
-                      Premium build quality with professional design
-                    </span>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                    <FaTruck className="text-gray-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        Fast Shipping
+                      </p>
+                      <p className="text-xs text-gray-600">In 4 days</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <FaCheck className="flex-shrink-0 text-green-600" />
-                    <span className="text-gray-700">
-                      Advanced security features for business use
-                    </span>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                    <FaShield className="text-gray-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        Security
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        Protected delivery
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <FaCheck className="flex-shrink-0 text-green-600" />
-                    <span className="text-gray-700">
-                      Enterprise-grade performance and reliability
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <FaCheck className="flex-shrink-0 text-green-600" />
-                    <span className="text-gray-700">
-                      Extended warranty and professional support
-                    </span>
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                    <FaClock className="text-gray-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">24/7</p>
+                      <p className="text-xs text-gray-600">Availability</p>
+                    </div>
                   </div>
                 </div>
               </CardBody>
@@ -312,22 +311,32 @@ export default function PhoneDetailPage() {
               </div>
 
               <div className="mb-6 text-3xl font-bold text-gray-900">
-                PKR{" "+phone.price.toLocaleString("en-PK", {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 2,
-                })}
+                PKR
+                {" " +
+                  phone.price.toLocaleString("en-PK", {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2,
+                  })}
               </div>
               <div className="flex items-center gap-2 p-1">
                 {phone.color.map((itm) => (
-                  <Tooltip content={itm.name} showArrow={true} size="sm">
+                  <Tooltip
+                    content={itm.avaliable ? itm.name : "unavaliable"}
+                    showArrow={true}
+                    size="sm"
+                  >
                     <Button
                       key={itm.hex}
                       size="sm"
                       radius="full"
+                      isDisabled={!itm.avaliable}
                       isIconOnly
-                      className="p-2 mb-2 text-white rounded-full"
+                      className={`p-2 mb-2 text-white rounded-full${itm.avaliable ? "" : " ring-2 ring-red-500"}`}
                       style={{ backgroundColor: itm.hex }}
-                      onClick={() => setImageUrl(itm.phone_img)}
+                      onPress={() => {
+                        setImageUrl(itm.phone_img);
+                        setSelectedColor({ name: itm.name, hex: itm.hex });
+                      }}
                     />
                   </Tooltip>
                 ))}
@@ -336,12 +345,10 @@ export default function PhoneDetailPage() {
               {/* Business Benefits */}
               <div className="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-3">
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
-                  <FaTruck className="text-gray-600" />
+                  <PiPlugChargingDuotone className="text-gray-600" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      Free Shipping
-                    </p>
-                    <p className="text-xs text-gray-600">Next business day</p>
+                    <p className="text-sm font-medium text-gray-900">Charger</p>
+                    <p className="text-xs text-gray-600">Availability</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
@@ -356,12 +363,13 @@ export default function PhoneDetailPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
-                  <FaClock className="text-gray-600" />
+                  <img
+                    src="https://cdn.brandfetch.io/id_C4Eftxe/w/150/h/95/theme/dark/logo.png?c=1bxid64Mup7aczewSAYMX&t=1746366721164"
+                    className="h-5"
+                  />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      24/7 Support
-                    </p>
-                    <p className="text-xs text-gray-600">Business priority</p>
+                    <p className="text-sm font-medium text-gray-900">PTA</p>
+                    <p className="text-xs text-gray-600">Approved</p>
                   </div>
                 </div>
               </div>
@@ -414,11 +422,9 @@ export default function PhoneDetailPage() {
                 </div>
               </div>
 
-              
-
               {/* Action Buttons */}
               <div className="space-y-3">
-                <AddToCartButton phone={phone} />
+                <AddToCartButton phone={phone} selectedColor={selectedColor} />
                 <Button
                   startContent={<ImArrowUpLeft />}
                   fullWidth

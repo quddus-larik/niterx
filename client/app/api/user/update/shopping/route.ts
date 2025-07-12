@@ -4,10 +4,9 @@ import clientPromise from "@/app/lib/db/mongoDB";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json(); // read JSON body
-    const { email, cell, address, zip, city } = body;
+    const body = await req.json();
+    const { email, orders } = body;
 
-    // Get current session user
     const user = await getUserSession();
     if (!user || !user.email) {
       return NextResponse.json(
@@ -16,7 +15,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Ensure email from session matches provided email
     if (email !== user.email) {
       return NextResponse.json(
         { error: true, message: "Unauthorized email" },
@@ -24,41 +22,37 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Connect to DB
     const client = await clientPromise;
     const db = client.db("niterx").collection("users");
 
-    // Update user record with new info
     const updateResult = await db.updateOne(
       { email: user.email },
       {
-        $set: {
-          cell,
-          address,
-          zip,
-          city,
-          shopping: {
-            orders: [],
-          }
+        $push: {
+          "shopping.orders": {
+            $each: orders,
+          },
         },
-      }
+      },
+      { upsert: true }
     );
 
-    if (updateResult.matchedCount === 0) {
+    if (updateResult.matchedCount === 0 && !updateResult.upsertedId) {
       return NextResponse.json(
-        { error: true, message: "User not found" },
+        { error: true, message: "User not found or not updated" },
         { status: 404 }
       );
     }
-    console.info('success API working');
+
+    console.info("Order appended successfully");
 
     return NextResponse.json({
       error: false,
-      message: "Profile details updated successfully",
-      userData: { email, cell, address, zip, city },
+      message: "Order added to shopping.orders",
+      userData: { email, orders },
     });
   } catch (error) {
-    console.error("Error in POST /user:", error);
+    console.error("Error in POST /user/shopping:", error);
     return NextResponse.json(
       { error: true, message: "Internal server error" },
       { status: 500 }

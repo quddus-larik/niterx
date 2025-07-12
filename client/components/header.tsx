@@ -20,6 +20,7 @@ import {
   Divider,
   Link,
 } from "@heroui/react";
+import { HeartHandshake, HistoryIcon, Icon, LogOut, NotepadText, Settings } from "lucide-react";
 
 interface UserData {
   error: boolean,
@@ -69,6 +70,7 @@ export default function Header({
             content={totalCartItems}
             color={totalCartItems === 0 ? "warning" : "primary"}
             size="md"
+            className="text-tiny"
           >
             <Button
               disableAnimation
@@ -105,17 +107,17 @@ export default function Header({
                 />
               </DropdownTrigger>
 
-              <DropdownMenu aria-label="User Actions" variant="flat">
+              <DropdownMenu  aria-label="User Actions" variant="faded">
                 <DropdownItem key="profile" className="h-8" onPress={()=> window.open("/profile")}>
                   <p className="font-bold">{loggedInUserData?.user.name}</p>
                 </DropdownItem>
-                <DropdownItem key="team_settings">Information</DropdownItem>
-                <DropdownItem key="analytics">History</DropdownItem>
-                <DropdownItem key="settings">My Settings</DropdownItem>
-                <DropdownItem key="help_and_feedback">
+                <DropdownItem key="team_settings" startContent={<NotepadText className="h-5"/>} description="Track orders" onClick={()=> window.location.href="/orders"} >Orders</DropdownItem>
+                <DropdownItem key="analytics" startContent={<HistoryIcon className="h-5"/>} description="previous orders">History</DropdownItem>
+                <DropdownItem key="settings" startContent={<Settings className="h-6" />} description="modify accessibility">Settings</DropdownItem>
+                <DropdownItem key="help_and_feedback" startContent={<HeartHandshake className="h-5" />} description="complaints & support">
                   Help & Feedback
                 </DropdownItem>
-                <DropdownItem key="logout" color="danger" onPress={onOpen}>
+                <DropdownItem key="logout" color="danger" onPress={onOpen} startContent={<LogOut className="h-5" />} description="leave market">
                   Log Out
                 </DropdownItem>
               </DropdownMenu>
