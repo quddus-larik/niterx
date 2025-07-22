@@ -29,7 +29,7 @@ const SuccessPayment = () => {
     const updatedOrders = cartItems.map((item) => ({
       ...item,
       buy_at: new Date().toISOString(),
-      status: "pending"
+      status: "processing"
     }));
 
     axios

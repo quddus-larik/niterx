@@ -236,43 +236,7 @@ export default function ProfilePage() {
           </CardBody>
         </Card>
         
-        <Card className="shadow-lg rounded-xl">
-          <CardHeader className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900">Account Settings</h2>
-          </CardHeader>
-          <Divider className="bg-gray-200" />
-          <CardBody className="px-6 py-8 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Icon icon="lucide:bell" className="text-2xl text-primary-600" />
-                <div>
-                  <p className="text-lg font-medium text-gray-800">
-                    Email Notifications
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Receive updates & offers from us
-                  </p>
-                </div>
-              </div>
-              <Switch defaultSelected color="primary" size="lg" />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Icon icon="lucide:shield" className="text-2xl text-primary-600" />
-                <div>
-                  <p className="text-lg font-medium text-gray-800">
-                    Two-Factor Authentication
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Add extra security to your account
-                  </p>
-                </div>
-              </div>
-              <Switch color="primary" size="lg" />
-            </div>
-          </CardBody>
-        </Card>
+        
       </div>
 
       <Modal isOpen={isEditOpen} onOpenChange={setIsEditOpen} placement="center">

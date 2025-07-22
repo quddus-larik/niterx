@@ -7,6 +7,14 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { email, orders } = body;
 
+    // Check if orders is valid array
+    if (!Array.isArray(orders) || orders.length === 0) {
+      return NextResponse.json(
+        { error: true, message: "Orders must be a non-empty array" },
+        { status: 400 }
+      );
+    }
+
     const user = await getUserSession();
     if (!user || !user.email) {
       return NextResponse.json(
@@ -22,15 +30,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const client = await clientPromise;
-    const db = client.db("niterx").collection("users");
+    // Append user email to each order
+    const user_orders = orders.map((order: any) => ({
+      ...order,
+      user_email: user.email,
+    }));
 
-    const updateResult = await db.updateOne(
+    const client = await clientPromise;
+    const usersCollection = client.db("niterx").collection("users");
+
+    const updateResult = await usersCollection.updateOne(
       { email: user.email },
       {
         $push: {
           "shopping.orders": {
-            $each: orders,
+            $each: user_orders,
           },
         },
       },
@@ -39,20 +53,20 @@ export async function POST(req: NextRequest) {
 
     if (updateResult.matchedCount === 0 && !updateResult.upsertedId) {
       return NextResponse.json(
-        { error: true, message: "User not found or not updated" },
+        { error: true, message: "User not found or update failed" },
         { status: 404 }
       );
     }
 
-    console.info("Order appended successfully");
+    console.info("✅ Order(s) appended successfully");
 
     return NextResponse.json({
       error: false,
-      message: "Order added to shopping.orders",
-      userData: { email, orders },
+      message: "Order(s) added to shopping.orders",
+      userData: { email, orders: user_orders },
     });
   } catch (error) {
-    console.error("Error in POST /user/shopping:", error);
+    console.error("❌ Error in POST /user/shopping:", error);
     return NextResponse.json(
       { error: true, message: "Internal server error" },
       { status: 500 }

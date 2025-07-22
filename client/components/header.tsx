@@ -113,11 +113,11 @@ export default function Header({
                 </DropdownItem>
                 <DropdownItem key="team_settings" startContent={<NotepadText className="h-5"/>} description="History & Track orders" onClick={()=> window.location.href="/orders"} >Orders</DropdownItem>
 
-                <DropdownItem key="settings" startContent={<Settings className="h-6" />} description="modify accessibility">Settings</DropdownItem>
-                <DropdownItem key="help_and_feedback" startContent={<HeartHandshake className="h-5" />} description="complaints & support">
+                <DropdownItem key="settings" startContent={<Settings className="h-6" />} description="modify accessibility" onClick={()=> window.location.href="/settings"}>Settings</DropdownItem>
+                <DropdownItem key="help_and_feedback" startContent={<HeartHandshake className="h-5" />} description="complaints & support" onClick={()=> window.location.href="/feedback"}>
                   Help & Feedback
                 </DropdownItem>
-                <DropdownItem key="logout" color="danger" onPress={onOpen} startContent={<LogOut className="h-5" />} description="leave market">
+                <DropdownItem key="logout" color="danger" onPress={onOpen} startContent={<LogOut className="h-5" />} description="leave market" >
                   Log Out
                 </DropdownItem>
               </DropdownMenu>
