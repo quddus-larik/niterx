@@ -1,5 +1,5 @@
-'use client'
-import React, { useEffect, useState } from 'react';
+"use client"
+import React, { useState } from 'react';
 import { 
   LayoutDashboard, 
   ShoppingCart, 
@@ -17,9 +17,32 @@ import {
   Edit,
   Trash2,
   Plus,
-  Filter
+  Filter,
+  X
 } from 'lucide-react';
-import axios from "axios";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Button,
+  Chip,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Input,
+  Textarea,
+  Select,
+  SelectItem,
+  Card,
+  CardBody,
+  CardHeader,
+  Divider
+} from '@heroui/react';
 
 // Mock data
 const mockData = {
@@ -34,40 +57,39 @@ const mockData = {
     productGrowth: 5.7
   },
   recentOrders: [
-    { id: '#ORD-001', customer: 'John Doe', product: 'iPhone 14 Pro', amount: 999, status: 'Completed', date: '2024-01-15' },
-    { id: '#ORD-002', customer: 'Sarah Wilson', product: 'MacBook Air', amount: 1299, status: 'Processing', date: '2024-01-15' },
-    { id: '#ORD-003', customer: 'Mike Johnson', product: 'AirPods Pro', amount: 249, status: 'Shipped', date: '2024-01-14' },
-    { id: '#ORD-004', customer: 'Emma Davis', product: 'iPad Pro', amount: 1099, status: 'Pending', date: '2024-01-14' },
-    { id: '#ORD-005', customer: 'Chris Brown', product: 'Apple Watch', amount: 399, status: 'Completed', date: '2024-01-13' }
+    { id: '#ORD-001', customer: 'John Doe', product: 'iPhone 14 Pro', amount: 999, status: 'completed', date: '2024-01-15' },
+    { id: '#ORD-002', customer: 'Sarah Wilson', product: 'MacBook Air', amount: 1299, status: 'processing', date: '2024-01-15' },
+    { id: '#ORD-003', customer: 'Mike Johnson', product: 'AirPods Pro', amount: 249, status: 'shipped', date: '2024-01-14' },
+    { id: '#ORD-004', customer: 'Emma Davis', product: 'iPad Pro', amount: 1099, status: 'pending', date: '2024-01-14' },
+    { id: '#ORD-005', customer: 'Chris Brown', product: 'Apple Watch', amount: 399, status: 'completed', date: '2024-01-13' }
   ],
-  
   topProducts: [
-    { id: 1, name: 'iPhone 14 Pro', sales: 234, revenue: 233766, stock: 45, image: '📱' },
-    { id: 2, name: 'MacBook Air M2', sales: 156, revenue: 202644, stock: 23, image: '💻' },
-    { id: 3, name: 'AirPods Pro', sales: 445, revenue: 110805, stock: 89, image: '🎧' },
-    { id: 4, name: 'iPad Pro', sales: 123, revenue: 135177, stock: 34, image: '📱' },
-    { id: 5, name: 'Apple Watch Ultra', sales: 89, revenue: 71111, stock: 67, image: '⌚' }
+    { id: 1, name: 'iPhone 14 Pro', sales: 234, revenue: 233766, stock: 45, image: '📱', category: 'Electronics', price: 999 },
+    { id: 2, name: 'MacBook Air M2', sales: 156, revenue: 202644, stock: 23, image: '💻', category: 'Electronics', price: 1299 },
+    { id: 3, name: 'AirPods Pro', sales: 445, revenue: 110805, stock: 89, image: '🎧', category: 'Audio', price: 249 },
+    { id: 4, name: 'iPad Pro', sales: 123, revenue: 135177, stock: 34, image: '📱', category: 'Electronics', price: 1099 },
+    { id: 5, name: 'Apple Watch Ultra', sales: 89, revenue: 71111, stock: 67, image: '⌚', category: 'Wearables', price: 799 }
   ],
   customers: [
-    { id: 1, name: 'John Doe', email: 'john@example.com', orders: 12, spent: 2340, joined: '2023-05-15', status: 'Active' },
-    { id: 2, name: 'Sarah Wilson', email: 'sarah@example.com', orders: 8, spent: 1890, joined: '2023-08-22', status: 'Active' },
-    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', orders: 15, spent: 3200, joined: '2023-03-10', status: 'VIP' },
-    { id: 4, name: 'Emma Davis', email: 'emma@example.com', orders: 6, spent: 1450, joined: '2023-11-05', status: 'Active' },
-    { id: 5, name: 'Chris Brown', email: 'chris@example.com', orders: 22, spent: 4560, joined: '2023-01-18', status: 'VIP' }
+    { id: 1, name: 'John Doe', email: 'john@example.com', orders: 12, spent: 2340, joined: '2023-05-15', status: 'active' },
+    { id: 2, name: 'Sarah Wilson', email: 'sarah@example.com', orders: 8, spent: 1890, joined: '2023-08-22', status: 'active' },
+    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', orders: 15, spent: 3200, joined: '2023-03-10', status: 'vip' },
+    { id: 4, name: 'Emma Davis', email: 'emma@example.com', orders: 6, spent: 1450, joined: '2023-11-05', status: 'active' },
+    { id: 5, name: 'Chris Brown', email: 'chris@example.com', orders: 22, spent: 4560, joined: '2023-01-18', status: 'vip' }
   ]
 };
 
 const Dashboard = () => {
   const [activeView, setActiveView] = useState('Dashboard');
-  const [AdminData, setAdminData] = useState({
-    totalRevenue: 245670,
-    totalOrders: 1247,
-    totalCustomers: 3420,
-    totalProducts: 156,
-    monthlyGrowth: 12.5,
-    orderGrowth: 8.3,
-    customerGrowth: 15.2,
-    productGrowth: 5.7
+  const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
+  const [isEditOrderModalOpen, setIsEditOrderModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    price: '',
+    category: '',
+    stock: '',
+    description: ''
   });
 
   const menuItems = [
@@ -79,34 +101,49 @@ const Dashboard = () => {
     { text: 'Settings', icon: <Settings size={20} />, id: 'Settings' }
   ];
 
-  const StatCard = ({ title, value, change, icon, color }) => (
-    <div className="p-6 transition-shadow bg-white border border-gray-100 shadow-sm rounded-xl hover:shadow-md">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900">{value}</p>
-          <div className="flex items-center mt-2">
-            <TrendingUp size={16} className={`${color} mr-1`} />
-            <span className={`text-sm font-medium ${color}`}>+{change}%</span>
-            <span className="ml-1 text-sm text-gray-500">vs last month</span>
-          </div>
-        </div>
-        <div className={`p-3 rounded-lg ${color.replace('text-', 'bg-').replace('-600', '-100')}`}>
-          {icon}
-        </div>
-      </div>
-    </div>
-  );
-
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'processing': return 'bg-blue-100 text-blue-800';
-      case 'shipped': return 'bg-purple-100 text-purple-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'completed': return 'success';
+      case 'processing': return 'primary';
+      case 'shipped': return 'secondary';
+      case 'pending': return 'warning';
+      case 'cancelled': return 'danger';
+      case 'active': return 'success';
+      case 'vip': return 'warning';
+      default: return 'default';
     }
+  };
+
+  const StatCard = ({ title, value, change, icon, color }) => (
+    <Card>
+      <CardBody className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-600">{title}</p>
+            <p className="mt-1 text-2xl font-bold text-gray-900">{value}</p>
+            <div className="flex items-center mt-2">
+              <TrendingUp size={16} className={`${color} mr-1`} />
+              <span className={`text-sm font-medium ${color}`}>+{change}%</span>
+              <span className="ml-1 text-sm text-gray-500">vs last month</span>
+            </div>
+          </div>
+          <div className={`p-3 rounded-lg ${color} bg-slate-100`}>
+            {icon}
+          </div>
+        </div>
+      </CardBody>
+    </Card>
+  );
+
+  const handleEditOrder = (order) => {
+    setSelectedOrder(order);
+    setIsEditOrderModalOpen(true);
+  };
+
+  const handleAddProduct = () => {
+    console.log('Adding product:', newProduct);
+    setIsAddProductModalOpen(false);
+    setNewProduct({ name: '', price: '', category: '', stock: '', description: '' });
   };
 
   const renderDashboard = () => (
@@ -122,7 +159,7 @@ const Dashboard = () => {
           title="Total Revenue" 
           value={`$${mockData.stats.totalRevenue.toLocaleString()}`}
           change={mockData.stats.monthlyGrowth}
-          icon={<DollarSign size={24} />}
+          icon={<DollarSign size={24}  />}
           color="text-green-600"
         />
         <StatCard 
@@ -151,65 +188,71 @@ const Dashboard = () => {
       {/* Charts and Tables Row */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recent Orders */}
-        <div className="bg-white border border-gray-100 shadow-sm lg:col-span-2 rounded-xl">
-          <div className="p-6 border-b border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Orders</h3>
-          </div>
-          <div className="p-6">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                    <th className="pb-3">Order ID</th>
-                    <th className="pb-3">Customer</th>
-                    <th className="pb-3">Product</th>
-                    <th className="pb-3">Amount</th>
-                    <th className="pb-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="space-y-2">
-                  {mockData.recentOrders.map((order, index) => (
-                    <tr key={order.id} className={index !== mockData.recentOrders.length - 1 ? 'border-b border-gray-50' : ''}>
-                      <td className="py-3 text-sm font-medium text-gray-900">{order.id}</td>
-                      <td className="py-3 text-sm text-gray-600">{order.customer}</td>
-                      <td className="py-3 text-sm text-gray-600">{order.product}</td>
-                      <td className="py-3 text-sm font-medium text-gray-900">${order.amount}</td>
-                      <td className="py-3">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                    </tr>
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader className="pb-3">
+              <h3 className="text-lg font-semibold text-gray-900">Recent Orders</h3>
+            </CardHeader>
+            <Divider />
+            <CardBody className="p-0">
+              <Table isStriped aria-label="Recent orders table" removeWrapper>
+                <TableHeader>
+                  <TableColumn>ORDER ID</TableColumn>
+                  <TableColumn>CUSTOMER</TableColumn>
+                  <TableColumn>PRODUCT</TableColumn>
+                  <TableColumn>AMOUNT</TableColumn>
+                  <TableColumn>STATUS</TableColumn>
+                </TableHeader>
+                <TableBody>
+                  {mockData.recentOrders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-medium text-blue-600">{order.id}</TableCell>
+                      <TableCell>{order.customer}</TableCell>
+                      <TableCell className="text-gray-600">{order.product}</TableCell>
+                      <TableCell className="font-medium">${order.amount}</TableCell>
+                      <TableCell>
+                        <Chip 
+                          color={getStatusColor(order.status)} 
+                          variant="flat" 
+                          size="sm"
+                        >
+                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </Chip>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                </TableBody>
+              </Table>
+            </CardBody>
+          </Card>
         </div>
 
         {/* Top Products */}
-        <div className="bg-white border border-gray-100 shadow-sm rounded-xl">
-          <div className="p-6 border-b border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900">Top Products</h3>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {mockData.topProducts.slice(0, 5).map((product) => (
-                <div key={product.id} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="text-2xl">{product.image}</div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{product.name}</p>
-                      <p className="text-xs text-gray-500">{product.sales} sales</p>
+        <div>
+          <Card>
+            <CardHeader className="pb-3">
+              <h3 className="text-lg font-semibold text-gray-900">Top Products</h3>
+            </CardHeader>
+            <Divider />
+            <CardBody>
+              <div className="space-y-4">
+                {mockData.topProducts.slice(0, 5).map((product) => (
+                  <div key={product.id} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="text-2xl">{product.image}</div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{product.name}</p>
+                        <p className="text-xs text-gray-500">{product.sales} sales</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-gray-900">${product.revenue.toLocaleString()}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">${product.revenue.toLocaleString()}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
+            </CardBody>
+          </Card>
         </div>
       </div>
     </div>
@@ -223,62 +266,127 @@ const Dashboard = () => {
           <p className="mt-1 text-gray-600">Manage and track all customer orders</p>
         </div>
         <div className="flex space-x-3">
-          <button className="flex items-center px-4 py-2 space-x-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-            <Filter size={16} />
-            <span>Filter</span>
-          </button>
-          <button className="flex items-center px-4 py-2 space-x-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-            <Plus size={16} />
-            <span>New Order</span>
-          </button>
+          <Button color="default" variant="bordered" startContent={<Filter size={16} />}>
+            Filter
+          </Button>
+          <Button color="primary" startContent={<Plus size={16} />}>
+            New Order
+          </Button>
         </div>
       </div>
 
-      <div className="bg-white border border-gray-100 shadow-sm rounded-xl">
-        <div className="p-6">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-xs font-medium tracking-wider text-left text-gray-500 uppercase border-b border-gray-200">
-                  <th className="pb-3">Order ID</th>
-                  <th className="pb-3">Customer</th>
-                  <th className="pb-3">Product</th>
-                  <th className="pb-3">Date</th>
-                  <th className="pb-3">Amount</th>
-                  <th className="pb-3">Status</th>
-                  <th className="pb-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockData.recentOrders.map((order, index) => (
-                  <tr key={order.id} className={index !== mockData.recentOrders.length - 1 ? 'border-b border-gray-50' : ''}>
-                    <td className="py-4 text-sm font-medium text-blue-600">{order.id}</td>
-                    <td className="py-4 text-sm text-gray-900">{order.customer}</td>
-                    <td className="py-4 text-sm text-gray-600">{order.product}</td>
-                    <td className="py-4 text-sm text-gray-600">{order.date}</td>
-                    <td className="py-4 text-sm font-medium text-gray-900">${order.amount}</td>
-                    <td className="py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="py-4">
-                      <div className="flex space-x-2">
-                        <button className="p-1 text-gray-400 hover:text-blue-600">
-                          <Eye size={16} />
-                        </button>
-                        <button className="p-1 text-gray-400 hover:text-green-600">
-                          <Edit size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      <Card>
+        <CardBody className="p-0">
+          <Table aria-label="Orders table" removeWrapper>
+            <TableHeader>
+              <TableColumn>ORDER ID</TableColumn>
+              <TableColumn>CUSTOMER</TableColumn>
+              <TableColumn>PRODUCT</TableColumn>
+              <TableColumn>DATE</TableColumn>
+              <TableColumn>AMOUNT</TableColumn>
+              <TableColumn>STATUS</TableColumn>
+              <TableColumn>ACTIONS</TableColumn>
+            </TableHeader>
+            <TableBody>
+              {mockData.recentOrders.map((order) => (
+                <TableRow key={order.id}>
+                  <TableCell className="font-medium text-blue-600">{order.id}</TableCell>
+                  <TableCell>{order.customer}</TableCell>
+                  <TableCell className="text-gray-600">{order.product}</TableCell>
+                  <TableCell className="text-gray-600">{order.date}</TableCell>
+                  <TableCell className="font-medium">${order.amount}</TableCell>
+                  <TableCell>
+                    <Chip 
+                      color={getStatusColor(order.status)} 
+                      variant="flat" 
+                      size="sm"
+                    >
+                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    </Chip>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        isIconOnly
+                        color="default"
+                        variant="light"
+                        size="sm"
+                      >
+                        <Eye size={16} />
+                      </Button>
+                      <Button
+                        isIconOnly
+                        color="primary"
+                        variant="light"
+                        size="sm"
+                        onPress={() => handleEditOrder(order)}
+                      >
+                        <Edit size={16} />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardBody>
+      </Card>
+
+      {/* Edit Order Modal */}
+      <Modal 
+        isOpen={isEditOrderModalOpen} 
+        onClose={() => setIsEditOrderModalOpen(false)}
+        size="2xl"
+      >
+        <ModalContent>
+          <ModalHeader>Edit Order {selectedOrder?.id}</ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              <Input
+                label="Customer"
+                value={selectedOrder?.customer || ''}
+                variant="bordered"
+              />
+              <Input
+                label="Product"
+                value={selectedOrder?.product || ''}
+                variant="bordered"
+              />
+              <Input
+                label="Amount"
+                value={selectedOrder?.amount ? `$${selectedOrder.amount}` : ''}
+                variant="bordered"
+              />
+              <Select 
+                label="Status" 
+                variant="bordered"
+                defaultSelectedKeys={selectedOrder ? [selectedOrder.status] : []}
+              >
+                <SelectItem key="pending" value="pending">Pending</SelectItem>
+                <SelectItem key="processing" value="processing">Processing</SelectItem>
+                <SelectItem key="shipped" value="shipped">Shipped</SelectItem>
+                <SelectItem key="completed" value="completed">Completed</SelectItem>
+                <SelectItem key="cancelled" value="cancelled">Cancelled</SelectItem>
+              </Select>
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button 
+              color="danger" 
+              variant="light" 
+              onPress={() => setIsEditOrderModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              color="primary"
+              onPress={() => setIsEditOrderModalOpen(false)}
+            >
+              Save Changes
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 
@@ -289,50 +397,135 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold text-gray-900">Products Management</h1>
           <p className="mt-1 text-gray-600">Manage your product catalog</p>
         </div>
-        <button className="flex items-center px-4 py-2 space-x-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-          <Plus size={16} />
-          <span>Add Product</span>
-        </button>
+        <Button 
+          color="primary" 
+          startContent={<Plus size={16} />}
+          onPress={() => setIsAddProductModalOpen(true)}
+        >
+          Add Product
+        </Button>
       </div>
 
-      <div className="bg-white border border-gray-100 shadow-sm rounded-xl">
-        <div className="p-6">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {mockData.topProducts.map((product) => (
-              <div key={product.id} className="p-4 transition-shadow border border-gray-200 rounded-lg hover:shadow-md">
-                <div className="mb-4 text-center">
-                  <div className="mb-2 text-4xl">{product.image}</div>
-                  <h3 className="font-semibold text-gray-900">{product.name}</h3>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {mockData.topProducts.map((product) => (
+          <Card key={product.id} className="transition-shadow hover:shadow-lg">
+            <CardBody className="p-4">
+              <div className="mb-4 text-center">
+                <div className="mb-2 text-4xl">{product.image}</div>
+                <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                <Chip color="default" variant="flat" size="sm" className="mt-1">
+                  {product.category}
+                </Chip>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Price:</span>
+                  <span className="font-medium">${product.price}</span>
                 </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Sales:</span>
-                    <span className="font-medium">{product.sales}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Revenue:</span>
-                    <span className="font-medium">${product.revenue.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Stock:</span>
-                    <span className={`font-medium ${product.stock < 30 ? 'text-red-600' : 'text-green-600'}`}>
-                      {product.stock}
-                    </span>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Sales:</span>
+                  <span className="font-medium">{product.sales}</span>
                 </div>
-                <div className="flex mt-4 space-x-2">
-                  <button className="flex-1 px-3 py-2 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
-                    Edit
-                  </button>
-                  <button className="px-3 py-2 text-sm text-red-600 border border-red-600 rounded hover:bg-red-50">
-                    <Trash2 size={16} />
-                  </button>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Revenue:</span>
+                  <span className="font-medium">${product.revenue.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Stock:</span>
+                  <Chip 
+                    color={product.stock < 30 ? 'danger' : 'success'} 
+                    variant="flat" 
+                    size="sm"
+                  >
+                    {product.stock}
+                  </Chip>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+              <div className="flex mt-4 space-x-2">
+                <Button color="primary" className="flex-1">
+                  Edit
+                </Button>
+                <Button color="danger" variant="light" isIconOnly>
+                  <Trash2 size={16} />
+                </Button>
+              </div>
+            </CardBody>
+          </Card>
+        ))}
       </div>
+
+      {/* Add Product Modal */}
+      <Modal 
+        isOpen={isAddProductModalOpen} 
+        onClose={() => setIsAddProductModalOpen(false)}
+        size="2xl"
+      >
+        <ModalContent>
+          <ModalHeader>Add New Product</ModalHeader>
+          <ModalBody>
+            <div className="space-y-4">
+              <Input
+                label="Product Name"
+                placeholder="Enter product name"
+                value={newProduct.name}
+                onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                variant="bordered"
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Price"
+                  placeholder="0.00"
+                  startContent="$"
+                  value={newProduct.price}
+                  onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                  variant="bordered"
+                />
+                <Input
+                  label="Stock Quantity"
+                  placeholder="0"
+                  value={newProduct.stock}
+                  onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
+                  variant="bordered"
+                />
+              </div>
+              <Select 
+                label="Category" 
+                placeholder="Select category"
+                variant="bordered"
+                value={newProduct.category}
+                onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+              >
+                <SelectItem key="electronics" value="electronics">Electronics</SelectItem>
+                <SelectItem key="audio" value="audio">Audio</SelectItem>
+                <SelectItem key="wearables" value="wearables">Wearables</SelectItem>
+                <SelectItem key="accessories" value="accessories">Accessories</SelectItem>
+              </Select>
+              <Textarea
+                label="Description"
+                placeholder="Enter product description"
+                value={newProduct.description}
+                onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                variant="bordered"
+              />
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button 
+              color="danger" 
+              variant="light" 
+              onPress={() => setIsAddProductModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              color="primary"
+              onPress={handleAddProduct}
+            >
+              Add Product
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 
@@ -345,53 +538,61 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="bg-white border border-gray-100 shadow-sm rounded-xl">
-        <div className="p-6">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-xs font-medium tracking-wider text-left text-gray-500 uppercase border-b border-gray-200">
-                  <th className="pb-3">Customer</th>
-                  <th className="pb-3">Email</th>
-                  <th className="pb-3">Orders</th>
-                  <th className="pb-3">Total Spent</th>
-                  <th className="pb-3">Joined</th>
-                  <th className="pb-3">Status</th>
-                  <th className="pb-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockData.customers.map((customer, index) => (
-                  <tr key={customer.id} className={index !== mockData.customers.length - 1 ? 'border-b border-gray-50' : ''}>
-                    <td className="py-4 text-sm font-medium text-gray-900">{customer.name}</td>
-                    <td className="py-4 text-sm text-gray-600">{customer.email}</td>
-                    <td className="py-4 text-sm text-gray-600">{customer.orders}</td>
-                    <td className="py-4 text-sm font-medium text-gray-900">${customer.spent}</td>
-                    <td className="py-4 text-sm text-gray-600">{customer.joined}</td>
-                    <td className="py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        customer.status === 'VIP' ? 'bg-gold-100 text-gold-800' : 'bg-green-100 text-green-800'
-                      }`}>
-                        {customer.status}
-                      </span>
-                    </td>
-                    <td className="py-4">
-                      <div className="flex space-x-2">
-                        <button className="p-1 text-gray-400 hover:text-blue-600">
-                          <Eye size={16} />
-                        </button>
-                        <button className="p-1 text-gray-400 hover:text-green-600">
-                          <Edit size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      <Card>
+        <CardBody className="p-0">
+          <Table aria-label="Customers table" removeWrapper>
+            <TableHeader>
+              <TableColumn>CUSTOMER</TableColumn>
+              <TableColumn>EMAIL</TableColumn>
+              <TableColumn>ORDERS</TableColumn>
+              <TableColumn>TOTAL SPENT</TableColumn>
+              <TableColumn>JOINED</TableColumn>
+              <TableColumn>STATUS</TableColumn>
+              <TableColumn>ACTIONS</TableColumn>
+            </TableHeader>
+            <TableBody>
+              {mockData.customers.map((customer) => (
+                <TableRow key={customer.id}>
+                  <TableCell className="font-medium">{customer.name}</TableCell>
+                  <TableCell className="text-gray-600">{customer.email}</TableCell>
+                  <TableCell>{customer.orders}</TableCell>
+                  <TableCell className="font-medium">${customer.spent}</TableCell>
+                  <TableCell className="text-gray-600">{customer.joined}</TableCell>
+                  <TableCell>
+                    <Chip 
+                      color={getStatusColor(customer.status)} 
+                      variant="flat" 
+                      size="sm"
+                    >
+                      {customer.status.toUpperCase()}
+                    </Chip>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        isIconOnly
+                        color="default"
+                        variant="light"
+                        size="sm"
+                      >
+                        <Eye size={16} />
+                      </Button>
+                      <Button
+                        isIconOnly
+                        color="primary"
+                        variant="light"
+                        size="sm"
+                      >
+                        <Edit size={16} />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardBody>
+      </Card>
     </div>
   );
 
@@ -427,36 +628,31 @@ const Dashboard = () => {
       {/* Sidebar */}
       <div className="w-64 bg-white border-r border-gray-200 shadow-sm">
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">🛍️ ShopAdmin</h2>
+          <h2 className="text-xl font-bold text-gray-900">🛍️ niterX</h2>
           <p className="mt-1 text-sm text-gray-600">Admin Dashboard</p>
         </div>
         
         <nav className="p-4">
           <ul className="space-y-1">
             {menuItems.map((item) => (
-              <li key={item.id}>
-                <button
+              
+                <Button
+                key={item.id}
                   onClick={() => setActiveView(item.id)}
-                  className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors ${
+                  className={`w-full justify-start h-12 ${
                     activeView === item.id
-                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-700'
+                      : 'text-gray-700 bg-transparent hover:bg-gray-100'
                   }`}
+                  startContent={item.icon}
+                  variant="light"
                 >
-                  <span className="mr-3">{item.icon}</span>
                   {item.text}
-                </button>
-              </li>
+                </Button>
+              
             ))}
           </ul>
         </nav>
-
-        <div className="absolute bottom-4 left-4 right-4">
-          <button className="flex items-center w-full px-4 py-3 text-left text-gray-700 transition-colors rounded-lg hover:bg-gray-100">
-            <LogOut size={20} className="mr-3" />
-            Logout
-          </button>
-        </div>
       </div>
 
       {/* Main Content */}
@@ -465,21 +661,19 @@ const Dashboard = () => {
         <header className="px-6 py-4 bg-white border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search size={20} className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+              <Input
+                placeholder="Search..."
+                startContent={<Search size={20} className="text-gray-400" />}
+                className="w-64"
+                variant="bordered"
+              />
             </div>
             
             <div className="flex items-center space-x-4">
-              <button className="relative p-2 text-gray-400 hover:text-gray-600">
+              <Button isIconOnly color="default" variant="light" className="relative">
                 <Bell size={20} />
                 <span className="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-red-500 rounded-full -top-1 -right-1">3</span>
-              </button>
+              </Button>
               <div className="flex items-center space-x-2">
                 <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
                   <User size={16} className="text-blue-600" />
