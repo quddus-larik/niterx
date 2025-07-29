@@ -1,12 +1,13 @@
-"use client"
-import React, { useState } from 'react';
-import { 
-  LayoutDashboard, 
-  ShoppingCart, 
-  Users, 
-  Package, 
-  BarChart3, 
-  Settings, 
+"use client";
+import React, { useEffect, useState } from "react";
+import { useValidatorFetch } from "@/app/lib/useFetch/useFetch";
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  Users,
+  Package,
+  BarChart3,
+  Settings,
   LogOut,
   Search,
   Bell,
@@ -18,8 +19,8 @@ import {
   Trash2,
   Plus,
   Filter,
-  X
-} from 'lucide-react';
+  X,
+} from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -41,10 +42,10 @@ import {
   Card,
   CardBody,
   CardHeader,
-  Divider
-} from '@heroui/react';
+  Divider,
+} from "@heroui/react";
+import axios from "axios";
 
-// Mock data
 const mockData = {
   stats: {
     totalRevenue: 245670,
@@ -53,64 +54,238 @@ const mockData = {
     totalProducts: 156,
     monthlyGrowth: 12.5,
     orderGrowth: 8.3,
+    productGrowth: 5.7,
     customerGrowth: 15.2,
-    productGrowth: 5.7
   },
   recentOrders: [
-    { id: '#ORD-001', customer: 'John Doe', product: 'iPhone 14 Pro', amount: 999, status: 'completed', date: '2024-01-15' },
-    { id: '#ORD-002', customer: 'Sarah Wilson', product: 'MacBook Air', amount: 1299, status: 'processing', date: '2024-01-15' },
-    { id: '#ORD-003', customer: 'Mike Johnson', product: 'AirPods Pro', amount: 249, status: 'shipped', date: '2024-01-14' },
-    { id: '#ORD-004', customer: 'Emma Davis', product: 'iPad Pro', amount: 1099, status: 'pending', date: '2024-01-14' },
-    { id: '#ORD-005', customer: 'Chris Brown', product: 'Apple Watch', amount: 399, status: 'completed', date: '2024-01-13' }
+    {
+      id: "#ORD-001",
+      customer: "John Doe",
+      product: "iPhone 14 Pro",
+      amount: 999,
+      status: "completed",
+      date: "2024-01-15",
+    },
+    {
+      id: "#ORD-002",
+      customer: "Sarah Wilson",
+      product: "MacBook Air",
+      amount: 1299,
+      status: "processing",
+      date: "2024-01-15",
+    },
+    {
+      id: "#ORD-003",
+      customer: "Mike Johnson",
+      product: "AirPods Pro",
+      amount: 249,
+      status: "shipped",
+      date: "2024-01-14",
+    },
+    {
+      id: "#ORD-004",
+      customer: "Emma Davis",
+      product: "iPad Pro",
+      amount: 1099,
+      status: "pending",
+      date: "2024-01-14",
+    },
+    {
+      id: "#ORD-005",
+      customer: "Chris Brown",
+      product: "Apple Watch",
+      amount: 399,
+      status: "completed",
+      date: "2024-01-13",
+    },
   ],
   topProducts: [
-    { id: 1, name: 'iPhone 14 Pro', sales: 234, revenue: 233766, stock: 45, image: '📱', category: 'Electronics', price: 999 },
-    { id: 2, name: 'MacBook Air M2', sales: 156, revenue: 202644, stock: 23, image: '💻', category: 'Electronics', price: 1299 },
-    { id: 3, name: 'AirPods Pro', sales: 445, revenue: 110805, stock: 89, image: '🎧', category: 'Audio', price: 249 },
-    { id: 4, name: 'iPad Pro', sales: 123, revenue: 135177, stock: 34, image: '📱', category: 'Electronics', price: 1099 },
-    { id: 5, name: 'Apple Watch Ultra', sales: 89, revenue: 71111, stock: 67, image: '⌚', category: 'Wearables', price: 799 }
+    {
+      id: 1,
+      name: "iPhone 14 Pro",
+      sales: 234,
+      revenue: 233766,
+      stock: 45,
+      image: "📱",
+      category: "Electronics",
+      price: 999,
+    },
+    {
+      id: 2,
+      name: "MacBook Air M2",
+      sales: 156,
+      revenue: 202644,
+      stock: 23,
+      image: "💻",
+      category: "Electronics",
+      price: 1299,
+    },
+    {
+      id: 3,
+      name: "AirPods Pro",
+      sales: 445,
+      revenue: 110805,
+      stock: 89,
+      image: "🎧",
+      category: "Audio",
+      price: 249,
+    },
+    {
+      id: 4,
+      name: "iPad Pro",
+      sales: 123,
+      revenue: 135177,
+      stock: 34,
+      image: "📱",
+      category: "Electronics",
+      price: 1099,
+    },
+    {
+      id: 5,
+      name: "Apple Watch Ultra",
+      sales: 89,
+      revenue: 71111,
+      stock: 67,
+      image: "⌚",
+      category: "Wearables",
+      price: 799,
+    },
   ],
   customers: [
-    { id: 1, name: 'John Doe', email: 'john@example.com', orders: 12, spent: 2340, joined: '2023-05-15', status: 'active' },
-    { id: 2, name: 'Sarah Wilson', email: 'sarah@example.com', orders: 8, spent: 1890, joined: '2023-08-22', status: 'active' },
-    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', orders: 15, spent: 3200, joined: '2023-03-10', status: 'vip' },
-    { id: 4, name: 'Emma Davis', email: 'emma@example.com', orders: 6, spent: 1450, joined: '2023-11-05', status: 'active' },
-    { id: 5, name: 'Chris Brown', email: 'chris@example.com', orders: 22, spent: 4560, joined: '2023-01-18', status: 'vip' }
-  ]
+    {
+      id: 1,
+      name: "John Doe",
+      email: "john@example.com",
+      orders: 12,
+      spent: 2340,
+      joined: "2023-05-15",
+      status: "active",
+    },
+    {
+      id: 2,
+      name: "Sarah Wilson",
+      email: "sarah@example.com",
+      orders: 8,
+      spent: 1890,
+      joined: "2023-08-22",
+      status: "active",
+    },
+    {
+      id: 3,
+      name: "Mike Johnson",
+      email: "mike@example.com",
+      orders: 15,
+      spent: 3200,
+      joined: "2023-03-10",
+      status: "vip",
+    },
+    {
+      id: 4,
+      name: "Emma Davis",
+      email: "emma@example.com",
+      orders: 6,
+      spent: 1450,
+      joined: "2023-11-05",
+      status: "active",
+    },
+    {
+      id: 5,
+      name: "Chris Brown",
+      email: "chris@example.com",
+      orders: 22,
+      spent: 4560,
+      joined: "2023-01-18",
+      status: "vip",
+    },
+  ],
 };
 
 const Dashboard = () => {
-  const [activeView, setActiveView] = useState('Dashboard');
+  const [activeView, setActiveView] = useState("Dashboard");
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
   const [isEditOrderModalOpen, setIsEditOrderModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [newProduct, setNewProduct] = useState({
-    name: '',
-    price: '',
-    category: '',
-    stock: '',
-    description: ''
+    name: "",
+    price: "",
+    category: "",
+    stock: "",
+    description: "",
+  });
+  const [Stats, setStats] = useState({
+    totalRevenue: 0,
+    totalOrders: 0,
+    totalCustomers: 0,
+    totalProducts: 0,
+    monthlyGrowth: 0,
+    orderGrowth: 0,
+    productGrowth: 0,
+    customerGrowth: 0,
   });
 
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:3000/api/user/orders/admin"
+        );
+        setOrders(res.data.orders);
+      } catch (error) {
+        console.error("Failed to fetch orders:", error);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  const { data, loading, error } = useValidatorFetch("/api/admin/v1/data", 180);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!loading && !error && data && isMounted) {
+      setStats(data);
+    }
+
+    if (error && isMounted) {
+      console.error("Failed to fetch dashboard data:", error);
+      // Optionally set some error state to show to users
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [data, loading, error]);
+
   const menuItems = [
-    { text: 'Dashboard', icon: <LayoutDashboard size={20} />, id: 'Dashboard' },
-    { text: 'Orders', icon: <ShoppingCart size={20} />, id: 'Orders' },
-    { text: 'Products', icon: <Package size={20} />, id: 'Products' },
-    { text: 'Customers', icon: <Users size={20} />, id: 'Customers' },
-    { text: 'Analytics', icon: <BarChart3 size={20} />, id: 'Analytics' },
-    { text: 'Settings', icon: <Settings size={20} />, id: 'Settings' }
+    { text: "Dashboard", icon: <LayoutDashboard size={20} />, id: "Dashboard" },
+    { text: "Orders", icon: <ShoppingCart size={20} />, id: "Orders" },
+    { text: "Products", icon: <Package size={20} />, id: "Products" },
+    { text: "Customers", icon: <Users size={20} />, id: "Customers" },
+    { text: "Analytics", icon: <BarChart3 size={20} />, id: "Analytics" },
+    { text: "Settings", icon: <Settings size={20} />, id: "Settings" },
   ];
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
-      case 'completed': return 'success';
-      case 'processing': return 'primary';
-      case 'shipped': return 'secondary';
-      case 'pending': return 'warning';
-      case 'cancelled': return 'danger';
-      case 'active': return 'success';
-      case 'vip': return 'warning';
-      default: return 'default';
+      case "completed":
+        return "success";
+      case "processing":
+        return "primary";
+      case "shipped":
+        return "secondary";
+      case "pending":
+        return "warning";
+      case "cancelled":
+        return "danger";
+      case "active":
+        return "success";
+      case "vip":
+        return "warning";
+      default:
+        return "default";
     }
   };
 
@@ -127,9 +302,7 @@ const Dashboard = () => {
               <span className="ml-1 text-sm text-gray-500">vs last month</span>
             </div>
           </div>
-          <div className={`p-3 rounded-lg ${color} bg-slate-100`}>
-            {icon}
-          </div>
+          <div className={`p-3 rounded-lg ${color} bg-slate-100`}>{icon}</div>
         </div>
       </CardBody>
     </Card>
@@ -141,45 +314,53 @@ const Dashboard = () => {
   };
 
   const handleAddProduct = () => {
-    console.log('Adding product:', newProduct);
+    console.log("Adding product:", newProduct);
     setIsAddProductModalOpen(false);
-    setNewProduct({ name: '', price: '', category: '', stock: '', description: '' });
+    setNewProduct({
+      name: "",
+      price: "",
+      category: "",
+      stock: "",
+      description: "",
+    });
   };
 
   const renderDashboard = () => (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
-        <p className="mt-1 text-gray-600">Welcome back! Here's what's happening with your store.</p>
+        <p className="mt-1 text-gray-600">
+          Welcome back! Here's what's happening with your store.
+        </p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard 
-          title="Total Revenue" 
-          value={`$${mockData.stats.totalRevenue.toLocaleString()}`}
-          change={mockData.stats.monthlyGrowth}
-          icon={<DollarSign size={24}  />}
+        <StatCard
+          title="Total Revenue"
+          value={`$${Stats?.totalRevenue || 0}`}
+          change={Stats?.monthlyGrowth || 0}
+          icon={<DollarSign size={24} />}
           color="text-green-600"
         />
-        <StatCard 
-          title="Orders" 
-          value={mockData.stats.totalOrders.toLocaleString()}
-          change={mockData.stats.orderGrowth}
+        <StatCard
+          title="Orders"
+          value={Stats?.totalOrders || 0}
+          change={Stats?.orderGrowth || 0}
           icon={<ShoppingCart size={24} />}
           color="text-blue-600"
         />
-        <StatCard 
-          title="Customers" 
-          value={mockData.stats.totalCustomers.toLocaleString()}
-          change={mockData.stats.customerGrowth}
+        <StatCard
+          title="Customers"
+          value={Stats?.totalCustomers || 0}
+          change={0}
           icon={<Users size={24} />}
           color="text-purple-600"
         />
-        <StatCard 
-          title="Products" 
-          value={mockData.stats.totalProducts}
-          change={mockData.stats.productGrowth}
+        <StatCard
+          title="Products"
+          value={Stats?.totalProducts || 0}
+          change={Stats?.productGrowth || 0}
           icon={<Package size={24} />}
           color="text-orange-600"
         />
@@ -191,7 +372,9 @@ const Dashboard = () => {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader className="pb-3">
-              <h3 className="text-lg font-semibold text-gray-900">Recent Orders</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Recent Orders
+              </h3>
             </CardHeader>
             <Divider />
             <CardBody className="p-0">
@@ -204,19 +387,26 @@ const Dashboard = () => {
                   <TableColumn>STATUS</TableColumn>
                 </TableHeader>
                 <TableBody>
-                  {mockData.recentOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium text-blue-600">{order.id}</TableCell>
-                      <TableCell>{order.customer}</TableCell>
-                      <TableCell className="text-gray-600">{order.product}</TableCell>
-                      <TableCell className="font-medium">${order.amount}</TableCell>
+                  {orders.slice(0, 6).map((itm) => (
+                    <TableRow key={itm.product.doc_id}>
+                      <TableCell className="font-medium text-blue-600">
+                        {"ORD-" + itm.product.doc_id}
+                      </TableCell>
+                      <TableCell>{itm.user_email}</TableCell>
+                      <TableCell className="text-gray-600">
+                        {itm.product.mobile_name}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        ${itm.product.price}
+                      </TableCell>
                       <TableCell>
-                        <Chip 
-                          color={getStatusColor(order.status)} 
-                          variant="flat" 
+                        <Chip
+                          color={getStatusColor(itm.status)}
+                          variant="flat"
                           size="sm"
                         >
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          {itm.status.charAt(0).toUpperCase() +
+                            itm.status.slice(1)}
                         </Chip>
                       </TableCell>
                     </TableRow>
@@ -231,22 +421,33 @@ const Dashboard = () => {
         <div>
           <Card>
             <CardHeader className="pb-3">
-              <h3 className="text-lg font-semibold text-gray-900">Top Products</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Top Products
+              </h3>
             </CardHeader>
             <Divider />
             <CardBody>
               <div className="space-y-4">
                 {mockData.topProducts.slice(0, 5).map((product) => (
-                  <div key={product.id} className="flex items-center justify-between">
+                  <div
+                    key={product.id}
+                    className="flex items-center justify-between"
+                  >
                     <div className="flex items-center space-x-3">
                       <div className="text-2xl">{product.image}</div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{product.name}</p>
-                        <p className="text-xs text-gray-500">{product.sales} sales</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {product.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {product.sales} sales
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">${product.revenue.toLocaleString()}</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        ${product.revenue.toLocaleString()}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -262,11 +463,19 @@ const Dashboard = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Orders Management</h1>
-          <p className="mt-1 text-gray-600">Manage and track all customer orders</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Orders Management
+          </h1>
+          <p className="mt-1 text-gray-600">
+            Manage and track all customer orders
+          </p>
         </div>
         <div className="flex space-x-3">
-          <Button color="default" variant="bordered" startContent={<Filter size={16} />}>
+          <Button
+            color="default"
+            variant="bordered"
+            startContent={<Filter size={16} />}
+          >
             Filter
           </Button>
           <Button color="primary" startContent={<Plus size={16} />}>
@@ -288,20 +497,36 @@ const Dashboard = () => {
               <TableColumn>ACTIONS</TableColumn>
             </TableHeader>
             <TableBody>
-              {mockData.recentOrders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium text-blue-600">{order.id}</TableCell>
-                  <TableCell>{order.customer}</TableCell>
-                  <TableCell className="text-gray-600">{order.product}</TableCell>
-                  <TableCell className="text-gray-600">{order.date}</TableCell>
-                  <TableCell className="font-medium">${order.amount}</TableCell>
+              {orders.map((order) => (
+                <TableRow key={order.product.doc_id}>
+                  <TableCell className="font-medium text-blue-600">
+                    {order.product.doc_id}
+                  </TableCell>
+                  <TableCell>{order.user_email}</TableCell>
+                  <TableCell className="text-gray-600">
+                    {order.product.mobile_name}
+                  </TableCell>
+                  <TableCell className="text-gray-600">
+                    {order.buy_at}
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    
+                    {parseInt(
+                      order.product.price * order.product.qty
+                    ).toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "PKR",
+                      maximumFractionDigits: 0, // removes after decimal
+                    })}
+                  </TableCell>
                   <TableCell>
-                    <Chip 
-                      color={getStatusColor(order.status)} 
-                      variant="flat" 
+                    <Chip
+                      color={getStatusColor(order.status)}
+                      variant="flat"
                       size="sm"
                     >
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      {order.status.charAt(0).toUpperCase() +
+                        order.status.slice(1)}
                     </Chip>
                   </TableCell>
                   <TableCell>
@@ -333,8 +558,8 @@ const Dashboard = () => {
       </Card>
 
       {/* Edit Order Modal */}
-      <Modal 
-        isOpen={isEditOrderModalOpen} 
+      <Modal
+        isOpen={isEditOrderModalOpen}
         onClose={() => setIsEditOrderModalOpen(false)}
         size="2xl"
       >
@@ -344,41 +569,53 @@ const Dashboard = () => {
             <div className="space-y-4">
               <Input
                 label="Customer"
-                value={selectedOrder?.customer || ''}
+                value={selectedOrder?.customer || ""}
                 variant="bordered"
               />
               <Input
                 label="Product"
-                value={selectedOrder?.product || ''}
+                value={selectedOrder?.product || ""}
                 variant="bordered"
               />
               <Input
                 label="Amount"
-                value={selectedOrder?.amount ? `$${selectedOrder.amount}` : ''}
+                value={selectedOrder?.amount ? `$${selectedOrder.amount}` : ""}
                 variant="bordered"
               />
-              <Select 
-                label="Status" 
+              <Select
+                label="Status"
                 variant="bordered"
-                defaultSelectedKeys={selectedOrder ? [selectedOrder.status] : []}
+                defaultSelectedKeys={
+                  selectedOrder ? [selectedOrder.status] : []
+                }
               >
-                <SelectItem key="pending" value="pending">Pending</SelectItem>
-                <SelectItem key="processing" value="processing">Processing</SelectItem>
-                <SelectItem key="shipped" value="shipped">Shipped</SelectItem>
-                <SelectItem key="completed" value="completed">Completed</SelectItem>
-                <SelectItem key="cancelled" value="cancelled">Cancelled</SelectItem>
+                <SelectItem key="pending" value="pending">
+                  Pending
+                </SelectItem>
+                <SelectItem key="processing" value="processing">
+                  Processing
+                </SelectItem>
+                <SelectItem key="shipped" value="shipped">
+                  Shipped
+                </SelectItem>
+                <SelectItem key="completed" value="completed">
+                  Completed
+                </SelectItem>
+                <SelectItem key="cancelled" value="cancelled">
+                  Cancelled
+                </SelectItem>
               </Select>
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button 
-              color="danger" 
-              variant="light" 
+            <Button
+              color="danger"
+              variant="light"
               onPress={() => setIsEditOrderModalOpen(false)}
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               color="primary"
               onPress={() => setIsEditOrderModalOpen(false)}
             >
@@ -394,11 +631,13 @@ const Dashboard = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Products Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Products Management
+          </h1>
           <p className="mt-1 text-gray-600">Manage your product catalog</p>
         </div>
-        <Button 
-          color="primary" 
+        <Button
+          color="primary"
           startContent={<Plus size={16} />}
           onPress={() => setIsAddProductModalOpen(true)}
         >
@@ -428,13 +667,15 @@ const Dashboard = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Revenue:</span>
-                  <span className="font-medium">${product.revenue.toLocaleString()}</span>
+                  <span className="font-medium">
+                    ${product.revenue.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Stock:</span>
-                  <Chip 
-                    color={product.stock < 30 ? 'danger' : 'success'} 
-                    variant="flat" 
+                  <Chip
+                    color={product.stock < 30 ? "danger" : "success"}
+                    variant="flat"
                     size="sm"
                   >
                     {product.stock}
@@ -455,8 +696,8 @@ const Dashboard = () => {
       </div>
 
       {/* Add Product Modal */}
-      <Modal 
-        isOpen={isAddProductModalOpen} 
+      <Modal
+        isOpen={isAddProductModalOpen}
         onClose={() => setIsAddProductModalOpen(false)}
         size="2xl"
       >
@@ -468,7 +709,9 @@ const Dashboard = () => {
                 label="Product Name"
                 placeholder="Enter product name"
                 value={newProduct.name}
-                onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                onChange={(e) =>
+                  setNewProduct({ ...newProduct, name: e.target.value })
+                }
                 variant="bordered"
               />
               <div className="grid grid-cols-2 gap-4">
@@ -477,50 +720,63 @@ const Dashboard = () => {
                   placeholder="0.00"
                   startContent="$"
                   value={newProduct.price}
-                  onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, price: e.target.value })
+                  }
                   variant="bordered"
                 />
                 <Input
                   label="Stock Quantity"
                   placeholder="0"
                   value={newProduct.stock}
-                  onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, stock: e.target.value })
+                  }
                   variant="bordered"
                 />
               </div>
-              <Select 
-                label="Category" 
+              <Select
+                label="Category"
                 placeholder="Select category"
                 variant="bordered"
                 value={newProduct.category}
-                onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                onChange={(e) =>
+                  setNewProduct({ ...newProduct, category: e.target.value })
+                }
               >
-                <SelectItem key="electronics" value="electronics">Electronics</SelectItem>
-                <SelectItem key="audio" value="audio">Audio</SelectItem>
-                <SelectItem key="wearables" value="wearables">Wearables</SelectItem>
-                <SelectItem key="accessories" value="accessories">Accessories</SelectItem>
+                <SelectItem key="electronics" value="electronics">
+                  Electronics
+                </SelectItem>
+                <SelectItem key="audio" value="audio">
+                  Audio
+                </SelectItem>
+                <SelectItem key="wearables" value="wearables">
+                  Wearables
+                </SelectItem>
+                <SelectItem key="accessories" value="accessories">
+                  Accessories
+                </SelectItem>
               </Select>
               <Textarea
                 label="Description"
                 placeholder="Enter product description"
                 value={newProduct.description}
-                onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                onChange={(e) =>
+                  setNewProduct({ ...newProduct, description: e.target.value })
+                }
                 variant="bordered"
               />
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button 
-              color="danger" 
-              variant="light" 
+            <Button
+              color="danger"
+              variant="light"
               onPress={() => setIsAddProductModalOpen(false)}
             >
               Cancel
             </Button>
-            <Button 
-              color="primary"
-              onPress={handleAddProduct}
-            >
+            <Button color="primary" onPress={handleAddProduct}>
               Add Product
             </Button>
           </ModalFooter>
@@ -534,7 +790,9 @@ const Dashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Customers</h1>
-          <p className="mt-1 text-gray-600">Manage your customer relationships</p>
+          <p className="mt-1 text-gray-600">
+            Manage your customer relationships
+          </p>
         </div>
       </div>
 
@@ -554,14 +812,20 @@ const Dashboard = () => {
               {mockData.customers.map((customer) => (
                 <TableRow key={customer.id}>
                   <TableCell className="font-medium">{customer.name}</TableCell>
-                  <TableCell className="text-gray-600">{customer.email}</TableCell>
+                  <TableCell className="text-gray-600">
+                    {customer.email}
+                  </TableCell>
                   <TableCell>{customer.orders}</TableCell>
-                  <TableCell className="font-medium">${customer.spent}</TableCell>
-                  <TableCell className="text-gray-600">{customer.joined}</TableCell>
+                  <TableCell className="font-medium">
+                    ${customer.spent}
+                  </TableCell>
+                  <TableCell className="text-gray-600">
+                    {customer.joined}
+                  </TableCell>
                   <TableCell>
-                    <Chip 
-                      color={getStatusColor(customer.status)} 
-                      variant="flat" 
+                    <Chip
+                      color={getStatusColor(customer.status)}
+                      variant="flat"
                       size="sm"
                     >
                       {customer.status.toUpperCase()}
@@ -598,24 +862,34 @@ const Dashboard = () => {
 
   const renderContent = () => {
     switch (activeView) {
-      case 'Dashboard': return renderDashboard();
-      case 'Orders': return renderOrders();
-      case 'Products': return renderProducts();
-      case 'Customers': return renderCustomers();
-      case 'Analytics':
+      case "Dashboard":
+        return renderDashboard();
+      case "Orders":
+        return renderOrders();
+      case "Products":
+        return renderProducts();
+      case "Customers":
+        return renderCustomers();
+      case "Analytics":
         return (
           <div className="py-12 text-center">
             <BarChart3 size={64} className="mx-auto mb-4 text-gray-300" />
-            <h2 className="mb-2 text-2xl font-bold text-gray-900">Analytics Dashboard</h2>
-            <p className="text-gray-600">Advanced analytics and reporting features coming soon.</p>
+            <h2 className="mb-2 text-2xl font-bold text-gray-900">
+              Analytics Dashboard
+            </h2>
+            <p className="text-gray-600">
+              Advanced analytics and reporting features coming soon.
+            </p>
           </div>
         );
-      case 'Settings':
+      case "Settings":
         return (
           <div className="py-12 text-center">
             <Settings size={64} className="mx-auto mb-4 text-gray-300" />
             <h2 className="mb-2 text-2xl font-bold text-gray-900">Settings</h2>
-            <p className="text-gray-600">Configure your store settings and preferences.</p>
+            <p className="text-gray-600">
+              Configure your store settings and preferences.
+            </p>
           </div>
         );
       default:
@@ -624,32 +898,31 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-svh bg-gray-50 max-w-*">
       {/* Sidebar */}
       <div className="w-64 bg-white border-r border-gray-200 shadow-sm">
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-xl font-bold text-gray-900">🛍️ niterX</h2>
           <p className="mt-1 text-sm text-gray-600">Admin Dashboard</p>
         </div>
-        
+
         <nav className="p-4">
           <ul className="space-y-1">
             {menuItems.map((item) => (
-              
-                <Button
+              <Button
                 key={item.id}
-                  onClick={() => setActiveView(item.id)}
-                  className={`w-full justify-start h-12 ${
-                    activeView === item.id
-                      ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-700'
-                      : 'text-gray-700 bg-transparent hover:bg-gray-100'
-                  }`}
-                  startContent={item.icon}
-                  variant="light"
-                >
-                  {item.text}
-                </Button>
-              
+                onClick={() => setActiveView(item.id)}
+                className={`w-full justify-start h-12 ${
+                  activeView === item.id
+                    ? "bg-blue-50 text-blue-700 ring-1 ring-blue-700"
+                    : "text-gray-700 bg-transparent hover:bg-gray-100"
+                }`}
+                startContent={item.icon}
+                variant="light"
+                disableAnimation
+              >
+                {item.text}
+              </Button>
             ))}
           </ul>
         </nav>
@@ -668,11 +941,18 @@ const Dashboard = () => {
                 variant="bordered"
               />
             </div>
-            
+
             <div className="flex items-center space-x-4">
-              <Button isIconOnly color="default" variant="light" className="relative">
+              <Button
+                isIconOnly
+                color="default"
+                variant="light"
+                className="relative"
+              >
                 <Bell size={20} />
-                <span className="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-red-500 rounded-full -top-1 -right-1">3</span>
+                <span className="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-red-500 rounded-full -top-1 -right-1">
+                  3
+                </span>
               </Button>
               <div className="flex items-center space-x-2">
                 <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
@@ -688,9 +968,7 @@ const Dashboard = () => {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-6 overflow-auto">
-          {renderContent()}
-        </main>
+        <main className="flex-1 p-6 overflow-auto">{renderContent()}</main>
       </div>
     </div>
   );

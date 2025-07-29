@@ -1,0 +1,19 @@
+{
+    "Endpoint": "/api/admin/v1/data",
+    "data": ["Total Revenue","Orders","Customers","Products","Recent Orders(5) [limit]","Top Products"],
+    "OrderManangement": {
+        "Endpoint": "/api/admin/v1/data/orders",
+        "data": ["total Orders customers"],
+        "config": ["shipped","process","cancel"]
+    },
+    "Products": {
+        "Endpoint": "/api/admin/v1/data/products",
+        "data": ["addition of Mobiles"],
+        "config": ["edit data"]
+    },
+    "Customers": {
+        "Endpoints": "/api/admin/v1/data/customers",
+        "data": ["Table of customers Loged In"],
+        "config": ["delete User data"]
+    }
+}
