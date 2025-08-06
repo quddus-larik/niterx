@@ -35,6 +35,7 @@ export async function GET() {
       ])
       .toArray();
 
+       
       
       const revenue = totalRevenueResult[0]?.totalRevenue || 0;
       
@@ -44,12 +45,13 @@ export async function GET() {
       const productsRes = await axios.get(`${baseUrl}/api/v1/products/phones`);
       const growthRes = await axios.get(`${baseUrl}/api/admin/v1/data/growth`);
       const customersRes = (await client.db('niterx').collection('users').find().toArray()).length
-
+      const customers = (await client.db('niterx').collection('users').find().toArray())
     const { monthlyGrowth, orderGrowth, productGrowth } = growthRes.data || {};
 
     return NextResponse.json({
       totalRevenue: revenue,
       totalCustomers: customersRes,
+      Customers: customers,
       totalOrders: ordersRes.data.orders.length,
       totalProducts: productsRes.data.phones.length,
       monthlyGrowth: monthlyGrowth ?? 0,

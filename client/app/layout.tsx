@@ -33,7 +33,7 @@ export default function RootLayout({
         )}
       >
         
-          <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
+          <Providers>
             <div>
               <main className="container">{children}</main>
             </div>

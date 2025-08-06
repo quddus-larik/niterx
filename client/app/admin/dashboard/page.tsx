@@ -221,22 +221,16 @@ const Dashboard = () => {
     orderGrowth: 0,
     productGrowth: 0,
     customerGrowth: 0,
+    Customers: []
   });
 
   const [orders, setOrders] = useState([]);
-
+  
+  const fetchOrders = async () => {
+    const res = await axios.get("http://localhost:3000/api/user/orders/admin");
+    setOrders(res.data.orders);
+  };
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:3000/api/user/orders/admin"
-        );
-        setOrders(res.data.orders);
-      } catch (error) {
-        console.error("Failed to fetch orders:", error);
-      }
-    };
-
     fetchOrders();
   }, []);
 
@@ -488,7 +482,7 @@ const Dashboard = () => {
         <CardBody className="p-0">
           <Table aria-label="Orders table" removeWrapper>
             <TableHeader>
-              <TableColumn>ORDER ID</TableColumn>
+              <TableColumn>S#</TableColumn>
               <TableColumn>CUSTOMER</TableColumn>
               <TableColumn>PRODUCT</TableColumn>
               <TableColumn>DATE</TableColumn>
@@ -497,10 +491,10 @@ const Dashboard = () => {
               <TableColumn>ACTIONS</TableColumn>
             </TableHeader>
             <TableBody>
-              {orders.map((order) => (
+              {orders.map((order, idx) => (
                 <TableRow key={order.product.doc_id}>
                   <TableCell className="font-medium text-blue-600">
-                    {order.product.doc_id}
+                    {idx + 1}
                   </TableCell>
                   <TableCell>{order.user_email}</TableCell>
                   <TableCell className="text-gray-600">
@@ -510,14 +504,14 @@ const Dashboard = () => {
                     {order.buy_at}
                   </TableCell>
                   <TableCell className="font-medium">
-                    
                     {parseInt(
                       order.product.price * order.product.qty
                     ).toLocaleString("en-US", {
                       style: "currency",
                       currency: "PKR",
                       maximumFractionDigits: 0, // removes after decimal
-                    })}
+                    })
+                    }
                   </TableCell>
                   <TableCell>
                     <Chip
@@ -805,51 +799,20 @@ const Dashboard = () => {
               <TableColumn>ORDERS</TableColumn>
               <TableColumn>TOTAL SPENT</TableColumn>
               <TableColumn>JOINED</TableColumn>
-              <TableColumn>STATUS</TableColumn>
-              <TableColumn>ACTIONS</TableColumn>
             </TableHeader>
             <TableBody>
-              {mockData.customers.map((customer) => (
-                <TableRow key={customer.id}>
-                  <TableCell className="font-medium">{customer.name}</TableCell>
+              {Stats.Customers.map((customer,idx) => (
+                <TableRow key={idx+1}>
+                  <TableCell className="font-medium">{customer.username}</TableCell>
                   <TableCell className="text-gray-600">
                     {customer.email}
                   </TableCell>
-                  <TableCell>{customer.orders}</TableCell>
+                  <TableCell>{customer.shopping.orders.length}</TableCell>
                   <TableCell className="font-medium">
-                    ${customer.spent}
+                    ${customer.spent || "null"}
                   </TableCell>
                   <TableCell className="text-gray-600">
-                    {customer.joined}
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      color={getStatusColor(customer.status)}
-                      variant="flat"
-                      size="sm"
-                    >
-                      {customer.status.toUpperCase()}
-                    </Chip>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        isIconOnly
-                        color="default"
-                        variant="light"
-                        size="sm"
-                      >
-                        <Eye size={16} />
-                      </Button>
-                      <Button
-                        isIconOnly
-                        color="primary"
-                        variant="light"
-                        size="sm"
-                      >
-                        <Edit size={16} />
-                      </Button>
-                    </div>
+                    {customer.joined || "null"}
                   </TableCell>
                 </TableRow>
               ))}
