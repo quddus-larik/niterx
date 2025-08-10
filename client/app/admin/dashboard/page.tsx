@@ -45,6 +45,7 @@ import {
   Divider,
 } from "@heroui/react";
 import axios from "axios";
+import { gql, useQuery } from "@apollo/client";
 
 const mockData = {
   stats: {
@@ -201,18 +202,8 @@ const mockData = {
 };
 
 const Dashboard = () => {
-  const [activeView, setActiveView] = useState("Dashboard");
-  const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
-  const [isEditOrderModalOpen, setIsEditOrderModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [newProduct, setNewProduct] = useState({
-    name: "",
-    price: "",
-    category: "",
-    stock: "",
-    description: "",
-  });
-  const [Stats, setStats] = useState({
+  // Default stats structure for easier resets and reference
+  const defaultStats = {
     totalRevenue: 0,
     totalOrders: 0,
     totalCustomers: 0,
@@ -221,37 +212,83 @@ const Dashboard = () => {
     orderGrowth: 0,
     productGrowth: 0,
     customerGrowth: 0,
-    Customers: []
+    Customers: [],
+  };
+
+  // UI State
+  const [activeView, setActiveView] = useState("Dashboard");
+  const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
+  const [isEditOrderModalOpen, setIsEditOrderModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  // Form State
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    price: "",
+    category: "",
+    stock: "",
+    description: "",
   });
 
+  // Data State
+  const [Stats, setStats] = useState(defaultStats);
   const [orders, setOrders] = useState([]);
-  
+
+  // Fetch Orders from REST API
   const fetchOrders = async () => {
-    const res = await axios.get("http://localhost:3000/api/user/orders/admin");
-    setOrders(res.data.orders);
+    try {
+      const res = await axios.get(
+        "http://localhost:3000/api/user/orders/admin"
+      );
+      setOrders(res.data.orders || []);
+    } catch (err) {
+      console.error("Failed to fetch orders:", err);
+    }
   };
+
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  const { data, loading, error } = useValidatorFetch("/api/admin/v1/data", 180);
+  // GraphQL Query for Phones
+  const GET_ALL_PHONES = gql`
+    query GetAllPhones {
+      getAllPhones {
+        doc_id
+        mobile_name
+        category {
+          name
+        }
+        phone_img
+        price
+        qty
+      }
+    }
+  `;
+  const {
+    data: GData,
+    loading, Gloading,
+    error: Gerror
+  } = useQuery(GET_ALL_PHONES)
+  console.log(GData);
 
+  // Custom Hook Data
+  const {
+    data: validatorData,
+    loading: validatorLoading,
+    error: validatorError,
+  } = useValidatorFetch("/api/admin/v1/data", 180);
+
+  // Sync Validator Data with Stats
   useEffect(() => {
-    let isMounted = true;
-
-    if (!loading && !error && data && isMounted) {
-      setStats(data);
+    if (!validatorLoading && !validatorError && validatorData) {
+      setStats(validatorData);
     }
 
-    if (error && isMounted) {
-      console.error("Failed to fetch dashboard data:", error);
-      // Optionally set some error state to show to users
+    if (validatorError) {
+      console.error("Failed to fetch dashboard data:", validatorError);
     }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [data, loading, error]);
+  }, [validatorData, validatorLoading, validatorError]);
 
   const menuItems = [
     { text: "Dashboard", icon: <LayoutDashboard size={20} />, id: "Dashboard" },
@@ -510,8 +547,7 @@ const Dashboard = () => {
                       style: "currency",
                       currency: "PKR",
                       maximumFractionDigits: 0, // removes after decimal
-                    })
-                    }
+                    })}
                   </TableCell>
                   <TableCell>
                     <Chip
@@ -640,14 +676,13 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {mockData.topProducts.map((product) => (
-          <Card key={product.id} className="transition-shadow hover:shadow-lg">
+        {GData.getAllPhones.map((product) => (
+          <Card key={product.doc_id} className="transition-shadow hover:shadow-lg">
             <CardBody className="p-4">
               <div className="mb-4 text-center">
-                <div className="mb-2 text-4xl">{product.image}</div>
-                <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                <img src={product.phone_img} alt={product.mobile_name} className="h-52"/>
                 <Chip color="default" variant="flat" size="sm" className="mt-1">
-                  {product.category}
+                  {product.category.name}
                 </Chip>
               </div>
               <div className="space-y-2 text-sm">
@@ -657,22 +692,17 @@ const Dashboard = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Sales:</span>
-                  <span className="font-medium">{product.sales}</span>
+                  <span className="font-medium">{product.qty}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Revenue:</span>
-                  <span className="font-medium">
-                    ${product.revenue.toLocaleString()}
-                  </span>
-                </div>
+                
                 <div className="flex justify-between">
                   <span className="text-gray-600">Stock:</span>
                   <Chip
-                    color={product.stock < 30 ? "danger" : "success"}
+                    color={product.qty < 30 ? "danger" : "success"}
                     variant="flat"
                     size="sm"
                   >
-                    {product.stock}
+                    {product.qty}
                   </Chip>
                 </div>
               </div>
@@ -696,15 +726,15 @@ const Dashboard = () => {
         size="2xl"
       >
         <ModalContent>
-          <ModalHeader>Add New Product</ModalHeader>
+          <ModalHeader>Add New Phone</ModalHeader>
           <ModalBody>
             <div className="space-y-4">
               <Input
-                label="Product Name"
-                placeholder="Enter product name"
+                label="Phone Name"
+                placeholder="Enter Phone name"
                 value={newProduct.name}
                 onChange={(e) =>
-                  setNewProduct({ ...newProduct, name: e.target.value })
+                  setNewProduct({ ...newProduct, mobile_name: e.target.value })
                 }
                 variant="bordered"
               />
@@ -724,7 +754,7 @@ const Dashboard = () => {
                   placeholder="0"
                   value={newProduct.stock}
                   onChange={(e) =>
-                    setNewProduct({ ...newProduct, stock: e.target.value })
+                    setNewProduct({ ...newProduct, qty: e.target.value })
                   }
                   variant="bordered"
                 />
@@ -733,22 +763,22 @@ const Dashboard = () => {
                 label="Category"
                 placeholder="Select category"
                 variant="bordered"
-                value={newProduct.category}
+                value={newProduct.category.name}
                 onChange={(e) =>
-                  setNewProduct({ ...newProduct, category: e.target.value })
+                  setNewProduct({ ...newProduct, category: { name: e.target.value }})
                 }
               >
                 <SelectItem key="electronics" value="electronics">
-                  Electronics
+                  Huawai
                 </SelectItem>
                 <SelectItem key="audio" value="audio">
-                  Audio
+                  Samsung
                 </SelectItem>
                 <SelectItem key="wearables" value="wearables">
-                  Wearables
+                  Asus
                 </SelectItem>
                 <SelectItem key="accessories" value="accessories">
-                  Accessories
+                  Oppo
                 </SelectItem>
               </Select>
               <Textarea
@@ -801,9 +831,11 @@ const Dashboard = () => {
               <TableColumn>JOINED</TableColumn>
             </TableHeader>
             <TableBody>
-              {Stats.Customers.map((customer,idx) => (
-                <TableRow key={idx+1}>
-                  <TableCell className="font-medium">{customer.username}</TableCell>
+              {Stats.Customers.map((customer, idx) => (
+                <TableRow key={idx + 1}>
+                  <TableCell className="font-medium">
+                    {customer.username}
+                  </TableCell>
                   <TableCell className="text-gray-600">
                     {customer.email}
                   </TableCell>
