@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     // Insert data into collection
     const result = await db.collection("phones").insertOne({
       doc_id: uuidv4().slice(0, 6),
-
+      qty,
       mobile_name,
       price,
       category,
